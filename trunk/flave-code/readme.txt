@@ -6,6 +6,13 @@ but still, it's one nifty little engine that I'm sure will be
 useful to someone!
 
 
+
+TODO List
+
+- Change the raycast engine so it casts the rays instead of adding them
+  to the broad-phase grid.
+
+
 Version History
 
 Legend:
@@ -14,6 +21,9 @@ Legend:
 * Fix
 . Note
 
+v0.6.3b
+
+* Ray-casting code revisited, ray-casting is now 23% faster
 
 v0.6.2b
 

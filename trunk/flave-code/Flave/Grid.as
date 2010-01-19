@@ -1,4 +1,4 @@
-/*
+﻿/*
 Flave v0.6b Copyright (c) 2010 Luiz Fernando
 
 Permission is hereby granted, free of charge, to any person
@@ -51,7 +51,7 @@ package Flave {
 		
 		public var MCMov:Sprite;
 		
-		var tolerance:Number = parseFloat("1.0E-8f");
+		public var tolerance:Number = parseFloat("1.0E-8f");
 		
 		public function Grid() {
 			setGrid(10);
@@ -67,8 +67,8 @@ package Flave {
 			grid = new Array(subdivision);
 			colls = [[null][null]];
 			
-			for(var i:int = 0;i<subdivision;i++){
-				grid[i] = new Array(subdivision);
+			for (var i:int = 0; i < subdivision; i++) {
+				grid[i] = new Array();
 				for(var j:int = 0;j<subdivision;j++){
 					grid[i][j] = new Array();
 				}
@@ -78,11 +78,17 @@ package Flave {
 		// Resets the broad phase grid to a new clear grid
 		// @param subdivision The grid subdivisions
 		public function resetGrid(subdivision:int) : void {
-			resolution = Math.ceil(1000/subdivision);
+			resolution = Math.ceil(550/subdivision);
 			subdiv = subdivision;
 			
 			//grid = new Array(subdivision);
 			colls = [[null][null]];
+			
+			for(var i:int = 0;i<subdivision;i++){
+				for(var j:int = 0;j<subdivision;j++){
+					grid[i][j] = new Array();
+				}
+			}
 		}
 		
 		// Adds a new particle to the broad phase collision checking
@@ -99,7 +105,7 @@ package Flave {
 			if(ior([x, y])) return;
 			
 			// Push it:
-			grid[x/resolution][y/resolution].push(part);
+			grid[x / resolution][y / resolution].push(part);
 			
 			// Push also the extremities:
 			// Now it ckecks the 8, instead of only 4:
@@ -272,6 +278,139 @@ package Flave {
 			}
 		}
 		
+		// Tests a ray against the broad phase collision checking
+		// @param c the ray to test against the broad phase
+		public function testRay(c:Ray) : void {
+			var vx:Number, vy:Number, incx:Number, incy:Number;
+			
+			var gridA:Number = resolution;
+			
+			var bax:Number = c.sx / gridA;
+			var bay:Number = c.sy / gridA;
+			var bbx:Number = c.ex / gridA;
+			var bby:Number = c.ey / gridA;
+			
+			if(bax < bbx) {
+				var tx:Number = bax;
+				bax = bbx;
+				bbx = tx;
+				
+				var ty:Number = bay;
+				bay = bby;
+				bby = ty;
+			}
+			
+			vx = bbx - bax;
+			vy = bby - bay;
+			
+			var scale:Number = 1;
+			
+			incx = ((vx < 0 ? -vx : vx) < tolerance) ? 1.0 / tolerance : 1.0 / (vx < 0 ? -vx : vx);
+			incy = ((vy < 0 ? -vy : vy) < tolerance) ? 1.0 / tolerance : 1.0 / (vy < 0 ? -vy : vy);
+			
+			/*incx = (Math.abs(vx) < tolerance) ? 1.0 / tolerance : 1.0 / Math.abs(vx);
+			incy = (Math.abs(vy) < tolerance) ? 1.0 / tolerance : 1.0 / Math.abs(vy);*/
+			
+			incx *= scale;
+			incy *= scale;
+			
+			var x:Number = int(bax);
+			var y:Number = int(bay);
+			
+			var dx:Number = (vx < 0.0) ? -1 : (vx > 0.0) ? 1 : 0;
+			var dy:Number = (vy < 0.0) ? -1 : (vy > 0.0) ? 1 : 0;
+			
+			dx *= scale;
+			dy *= scale;
+			
+			var accumx:Number = (vx < 0.0) ? (bax - x) * incx : ((x+1*scale) - bay) * incx;
+			var accumy:Number = (vy < 0.0) ? (bay - y) * incy : ((y+1*scale) - bay) * incy;
+			
+			accumx *= scale;
+			accumy *= scale;
+			
+			var t:Number = 0.0;
+			
+			var l:int, i:int, obj:*, result:Array, ddx:Number, ddy:Number, dis:Number;
+			
+			var resBy1:Number = 1 / resolution, hit:Boolean = false;
+			
+			while (t <= 1.0)
+			{
+				if (!ior(x) && !ior(y) && grid[x] != undefined && grid[x][y] != undefined) {
+					l = grid[x][y].length;
+					
+					for (i = 0; i < l; i++) {
+						obj = grid[x][y][i];
+						
+						if (obj is Particle) {
+							result = CollisionResolver.rayOnParticle(obj, c);
+							
+							if (result[0]) {
+								// Test if the hit was inside this cell:
+								if (int(result[1].X * resBy1) == x && int(result[1].Y * resBy1) == y) {
+									// Test to see if this collision is closer to the casting point:
+									ddx = result[1].X - c.sx;
+									ddy = result[1].Y - c.sy;
+									
+									dis = Math.sqrt(ddx * ddx + ddy * ddy);
+									
+									if (dis < c.CurRange) {
+										c.ex = result[1].x;
+										c.ey = result[1].y;
+										c.lastHit = obj;
+										c.CurRange = dis;
+										hit = true;
+									}
+								}
+							}
+						}
+						
+						if (obj is Constraint) {
+							result = CollisionResolver.rayOnConstraint(obj, c);
+							
+							if (result[0]) {
+								//FlashConnect.atrace(result);
+								// Test if the hit was inside this cell:
+								//FlashConnect.atrace(x, y, result[1].x, result[1].y, int(result[1].x / resolution), int(result[1].y / resolution));
+								if (true){//int(result[1].X / resolution) == x && int(result[1].Y / resolution) == y) {
+									// Test to see if this collision is closer to the casting point:
+									ddx = result[1].X - c.sx;
+									ddy = result[1].Y - c.sy;
+									
+									dis = Math.sqrt(ddx * ddx + ddy * ddy);
+									
+									if (dis < c.CurRange) {
+										c.ex = result[1].X;
+										c.ey = result[1].Y;
+										c.lastHit = obj;
+										c.CurRange = dis;
+										hit = true;
+									}
+								}
+							}
+						}
+						
+						// Did it hit something? Then finish!
+						// if (hit) return;
+					}
+				}
+				
+				if(accumx < accumy)
+				{
+					t	 	= accumx;
+					accumx += incx;
+					x	   += dx;
+				}
+				else
+				{
+					t		= accumy;
+					accumy += incy;
+					y	   += dy;
+				}
+			}
+		}
+		
 		// Returns if a value is out of the Broad-Phase range
 		// @param x the value to check the range validity
 		public function ior(x:*) : Boolean {
@@ -317,8 +456,10 @@ package Flave {
 								CollisionResolver.resolveCircleConstraint(a, b);
 							}
 							
+							// NO MORE RAYS ON THE BROAD-PHASE GRID
+							
 							// Particle-Ray
-							if(a is Particle &&
+							/*if(a is Particle &&
 							   b is Ray){
 								CollisionResolver.rayOnParticle(a, b);
 							}
@@ -327,7 +468,7 @@ package Flave {
 							if(a is Constraint &&
 							   b is Ray){
 								CollisionResolver.rayOnConstraint(a, b);
-							}
+							}*/
 						}
 					}
 					
@@ -342,9 +483,6 @@ package Flave {
 						MCMov.graphics.lineTo(x * resolution+1, y * (resolution)+resolution-1);
 						MCMov.graphics.lineTo(x * resolution+1, y * resolution+1);
 					}
-					
-					// Reset this cell
-					grid[x][y] = [];
 				}
 			}
 		}
@@ -357,7 +495,7 @@ package Flave {
 		
 		// Returns the number of particles found on the cell given by
 		// the X and Y coordinates
-		public function partsOnCell(cellX:int, cellY:int) : uint {
+		public function partsOnCell(cellX:int, cellY:int) : int {
 			var parts:int = 0;
 			
 			for(var i:int = 0;i<grid[cellX][cellY].length;i++){
@@ -371,7 +509,7 @@ package Flave {
 		
 		// Returns the number of constraints found on the cell given by
 		// the X and Y coordinates
-		public function consOnCell(cellX:int, cellY:int) : uint {
+		public function consOnCell(cellX:int, cellY:int) : int {
 			var cons:int = 0;
 			
 			for(var i:int = 0;i<grid[cellX][cellY].length;i++){

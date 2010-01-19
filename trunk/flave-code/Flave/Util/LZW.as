@@ -13,7 +13,7 @@ package Flave.Util {
 			var dico:Array = new Array();
 			var skipnum:Number = xmlsafe ? 5 : 0;
 			
-			for (var i = 0; i < 256; i++) {
+			for (var i:int = 0; i < 256; i++) {
 				dico[String.fromCharCode(i)] = i;
 			}
 			
@@ -33,7 +33,7 @@ package Flave.Util {
 			var buffer:String = "";
 			
 			for (i = 0; i <= len; i++) {
-				var current = splitStr[i];
+				var current:String = splitStr[i];
 				
 				if (dico[buffer + current] !== undefined) {
 					buffer += current;
@@ -52,7 +52,7 @@ package Flave.Util {
 			var dico:Array = new Array();
 			var skipnum:Number = xmlsafe ? 5 : 0;
 			
-			for (var i = 0; i < 256; i++){
+			for (var i:int = 0; i < 256; i++){
 				var c:String = String.fromCharCode(i);
 				dico[i] = c;
 			}

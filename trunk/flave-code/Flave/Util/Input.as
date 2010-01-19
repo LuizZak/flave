@@ -24,15 +24,16 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 
 package Flave.Util {
+	import flash.display.DisplayObject;
 	import flash.events.KeyboardEvent;
 	import flash.events.FocusEvent;
 	
 	public class Input {
-		private var press_left = false;
-		private var press_right = false;
-		private var press_up = false;
-		private var press_down = false;
-		private var press_space = false;
+		private var press_left:Boolean = false;
+		private var press_right:Boolean = false;
+		private var press_up:Boolean = false;
+		private var press_down:Boolean = false;
+		private var press_space:Boolean = false;
 		
 		public var Keys:Array = new Array(150);
 		
@@ -40,12 +41,12 @@ package Flave.Util {
 		
 		public static var calls:Array = new Array();
 		
-		public function Input(movieclip) {
+		public function Input(movieclip:DisplayObject) {
 			movieclip.stage.addEventListener(KeyboardEvent.KEY_DOWN, key_down, false, 0);
 			movieclip.stage.addEventListener(KeyboardEvent.KEY_UP, key_up, false, 1);
 		}
 		
-		public function focus(e:FocusEvent){
+		public function focus(e:FocusEvent) : void {
 			for(var i:int = 0;i<Keys.length;i++){
 				Keys[i] = false;
 			}
@@ -57,32 +58,32 @@ package Flave.Util {
 			press_space = false;
 		}
 		
-		public function is_left() {
+		public function is_left() : Boolean {
 			return press_left;
 		}
 		
-		public function is_right() {
+		public function is_right() : Boolean {
 			return press_right;
 		}
 		
-		public function is_up() {
+		public function is_up() : Boolean {
 			return press_up;
 		}
 		
-		public function is_down() {
+		public function is_down() : Boolean {
 			return press_down;
 		}
 		
-		public function is_space() {
+		public function is_space() : Boolean {
 			return press_space;
 		}
 		
-		public function isDown(key:int){
+		public function isDown(key:int) : Boolean {
 			return Keys[key];
 		}
 		
-		private function key_down(event:KeyboardEvent) {
-			for(var i=0;i<calls.length;i++){
+		private function key_down(event:KeyboardEvent) : void {
+			for(var i:int = 0; i < calls.length; i++){
 				calls[i](event);
 			}
 			
@@ -107,7 +108,7 @@ package Flave.Util {
 			}
 		}
 		
-		private function key_up(event:KeyboardEvent) {
+		private function key_up(event:KeyboardEvent) : void {
 			
 			Keys[event.keyCode] = false;
 			

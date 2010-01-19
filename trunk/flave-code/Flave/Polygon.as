@@ -64,19 +64,19 @@ package Flave {
 			this.removeEventListener("enterFrame", loop, false);
 		}
 		
-		function loop(e:*) : void {
+		public function loop(e:*) : void {
 			redraw();
 		}
 		
-		function over(e:*) : void {
+		public function over(e:*) : void {
 			
 		}
 		
-		function out(e:*) : void {
+		public function out(e:*) : void {
 			
 		}
 		
-		function click(e:*) : void {
+		public function click(e:*) : void {
 			
 		}
 		
@@ -89,7 +89,7 @@ package Flave {
 			this.graphics.beginFill(color);
 			this.graphics.moveTo(spots[0].X, spots[0].Y);
 			
-			for(var i=0;i<spots.length;i++){
+			for(var i:int = 0; i < spots.length; i++){
 				if(spots[i].callBack() != true) {
 					parent["removePoly"](this);
 					return;
@@ -110,7 +110,7 @@ package Flave {
 			this.graphics.beginFill(Input.keysDown[17] ? 0xff0000 : 0xffff00, 0.75);
 			this.graphics.moveTo(spots[0].X, spots[0].Y);
 			
-			for(var i=0;i<spots.length;i++){
+			for(var i:int = 0; i < spots.length; i++){
 				if(spots[i].callBack() != true) {
 					parent["removePoly"](this);
 					return;
@@ -126,7 +126,7 @@ package Flave {
 		public function genString() : String {
 			var out:String = "n," + color + ",";
 			
-			for(var i:int=0; i<spots.length; i++){
+			for(var i:int = 0; i < spots.length; i++){
 				out += spots[i]._handler + (i == spots.length-1 ? "" : ",");
 			}
 			

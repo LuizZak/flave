@@ -107,10 +107,10 @@ package Flave {
 			// TODO: Apply the force also to the constraint's particles:
 			
 			// Math.abs is too slow :(
-			var dpx = p0.oldx - p0.X;
+			var dpx:Number = p0.oldx - p0.X;
 			dpx = (dpx < 0 ? -dpx : dpx);
 			
-			var dpy = p0.oldy - p0.Y;
+			var dpy:Number = p0.oldy - p0.Y;
 			dpy = (dpy < 0 ? -dpy : dpy);
 			
 			if((dpx > p0.rad || dpy > p0.rad) && checkLines(p1v, p2v, pov, p0v)[0] && !p0.fixed){
@@ -251,13 +251,15 @@ package Flave {
             return checkLines(ptA, ptB, ptC, ptD);
 		}
 		
+		// TODO: When the ray is shortened by a collision, remove it from
+		//       the cells it isn't present anymore
 		// Checks for collision between a ray and a particle
 		// @param p0 The particle to check
 		// @param ray The ray to check
-		public static function rayOnParticle(p0:Particle, ray:Ray) : void {
-			// Do not test if line is the ray's caster are linked:
+		public static function rayOnParticle(p0:Particle, ray:Ray) : Array {
+			// Do not test if line is the ray's caster:
 			if(ray.Caster == p0)
-				return;
+				return [false];
 			
 			var oex:Number = ray.ex;
 			var oey:Number = ray.ey;
@@ -278,13 +280,13 @@ package Flave {
             var midpt:Vector2 = new Vector2(x1_ + proj1.X, y1_ + proj1.Y);
             var distToCenter:Number = (midpt.X - x3_) * (midpt.X - x3_) + (midpt.Y - y3_) * (midpt.Y - y3_);
             
-			if (distToCenter > r3_ * r3_) return;
+			if (distToCenter > r3_ * r3_) return [false];
 			
             if (distToCenter == r3_ * r3_)
             {
                 //ray.ex = midpt.x;
 				//ray.ey = midpt.y;
-                return;
+                return [false];
             }
 	        var distToIntersection:Number;
             if (distToCenter == 0)
@@ -300,24 +302,30 @@ package Flave {
            	v1.multEquals(lineSegmentLength);
             v1.multEquals(distToIntersection);
 			
+			var sol:Vector2, hit:Boolean;
+			
 			// If you want inner circle collision checking...
            	var solution1:Vector2 = midpt.plus(v1);
             if ((solution1.X - x1_) * v1.X + (solution1.Y - y1_) * v1.Y > 0)
             {
                 //result.InsertSolution(solution1);
-				ray.ex = solution1.x;
+				/*ray.ex = solution1.x;
 				ray.ey = solution1.y;
 				
-				ray.lastHit = p0;
+				ray.lastHit = p0;*/
+				sol = solution1;
+				hit = true;
             }
             var solution2:Vector2 = midpt.minus(v1);
             if ((solution2.X - x1_) * v1.X + (solution2.Y - y1_) * v1.Y > 0)
             {
                 //result.InsertSolution(solution2);
-				ray.ex = solution2.x;
+				/*ray.ex = solution2.x;
 				ray.ey = solution2.y;
 				
-				ray.lastHit = p0;
+				ray.lastHit = p0;*/
+				sol = solution2;
+				hit = true;
             }
 			
 			
@@ -330,18 +338,23 @@ package Flave {
 			var dis:Number = Math.sqrt(dx * dx + dy * dy);
 			
 			if(Math.sqrt(dox * dox + doy * doy) < dis){
-				ray.ex = oex;
-				ray.ey = oey;
-				
-				ray.lastHit = olh;
+				sol.x = oex;
+				sol.y = oey;
+				hit = false;
 			} else if(dis > ray.Range){
-				ray.updateBeam(ray.sx, ray.sy, ray.Direction, ray.Range);
+				// ray.updateBeam(ray.sx, ray.sy, ray.Direction, ray.Range);
 			}
+			
+			return [hit, sol];
 		}
 		
-		// Perform collision check against a constraint and a ray:
-		public static function rayOnConstraint(c0:Constraint, ray:Ray) : void {
-			var result = checkLinesP(ray.sx, ray.sy, ray.ex, ray.ey, c0.p1.X, c0.p1.Y, c0.p2.X, c0.p2.Y);
+		// TODO: When the ray is shortened by a collision, remove it from
+		//       the cells it isn't present anymore
+		// Perform collision check against a constraint and a ray
+		// @param c0 The constraint to check
+		// @param ray The ray to check
+		public static function rayOnConstraint(c0:Constraint, ray:Ray) : Array {
+			var result:Array = checkLinesP(ray.sx, ray.sy, ray.ex, ray.ey, c0.p1.X, c0.p1.Y, c0.p2.X, c0.p2.Y);
 			
 			//var oex = ray.ex;
 			//var oey = ray.ey;
@@ -351,6 +364,8 @@ package Flave {
 				ray.ey = result[1].Y;
 				ray.lastHit = c0;
 			}
+			
+			return result;
 		}
 		
 		public static function distance(x1:Number, y1:Number, x2:Number, y2:Number) : Number {
