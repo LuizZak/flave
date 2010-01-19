@@ -43,7 +43,7 @@ package Flave.Util {
 			
 			var strs:String = "";
 			var a:Number;
-			for(var i = 0; i < str.length; i++){
+			for(var i:int = 0; i < str.length; i++){
 				a = str.charCodeAt(i);
 				if(a != 9 && a != 10 && a != 13 && a != 32)
 					strs += String.fromCharCode(str.charCodeAt(i));

@@ -59,7 +59,7 @@ package Flave {
 		
 		// Whether the engine can be interacted with (drag particles
 		// around, etc)
-		public var interactible = true;
+		public var interactible:Boolean = true;
 		
 		// Array of partices, constraints, polygons and raycasters
 		public var parts:Array = new Array();
@@ -134,6 +134,24 @@ package Flave {
 			}
 			
 			// Rays:
+			/*for(i=0;i<rays.length;i++){
+				rays[i].trim(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
+				if(rays[i].fixOnCaster && rays[i].Caster != null){
+					rays[i].updateBeam(rays[i].Caster.X, rays[i].Caster.Y, rays[i].Direction, rays[i].Range);
+				} else {
+					rays[i].updateBeam(rays[i].sx, rays[i].sy, rays[i].Direction, rays[i].Range);
+				}
+				// Don't need to add 'em anymore!
+				// grid.addRay(rays[i]);
+			}*/
+			
+			// Resolve the broadphase:
+			// var t = getTimer();
+			if(Configuration.PartPart){
+				for(i=0;i<iterations;i++)
+					grid.resolveBroadPhase();
+			}
+			// Resolve the ray-trace:
 			for(i=0;i<rays.length;i++){
 				rays[i].trim(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
 				if(rays[i].fixOnCaster && rays[i].Caster != null){
@@ -141,14 +159,8 @@ package Flave {
 				} else {
 					rays[i].updateBeam(rays[i].sx, rays[i].sy, rays[i].Direction, rays[i].Range);
 				}
-				grid.addRay(rays[i]);
-			}
-			
-			// Resolve the broadphase:
-			// var t = getTimer();
-			if(Configuration.PartPart){
-				for(i=0;i<iterations;i++)
-					grid.resolveBroadPhase();
+				// Don't need to add 'em anymore!
+				grid.testRay(rays[i]);
 			}
 			// trace("Resolve time: " + (getTimer() - t));
 			
@@ -297,16 +309,16 @@ package Flave {
 			var tempA:Array = new Array();
 			
 			// Split one more time and decode:
-			for(var i=0;i<tempS.length;i++){
+			for(var i:int = 0; i < tempS.length; i++){
 				tempA[i] = tempS[i].split(",");
 			}
 			
 			// Temp variables:
 			var obs:Object = {};
 			
-			var A:*, B:*, D:*, Hand:String, S, X:Number, Y:Number, currentType:String;
+			var A:*, B:*, D:*, Hand:String, S:*, X:Number, Y:Number, currentType:String;
 			
-			for(i=0;i<tempA.length;i++){
+			for(i = 0; i < tempA.length; i++){
 				if(tempA[i][0] != undefined/* && tempA[i][1] != undefined && tempA[i][2] != undefined*/){
 					if(tempA[i][0] == "p" || tempA[i][0] == "f" || tempA[i][0] == "d" || tempA[i][0] == "o"){
 						currentType = tempA[i][0];
@@ -520,7 +532,7 @@ package Flave {
 			
 			var strs:String = "";
 			var a:Number;
-			for(var i = 0; i < str.length; i++){
+			for(var i:int = 0; i < str.length; i++){
 				a = str.charCodeAt(i);
 				if(a != 9 && a != 10 && a != 13 && a != 32)
 					strs += String.fromCharCode(str.charCodeAt(i));

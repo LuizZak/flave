@@ -1,4 +1,4 @@
-/*
+﻿/*
 Flave v0.6b Copyright (c) 2010 Luiz Fernando
 
 Permission is hereby granted, free of charge, to any person
@@ -38,6 +38,8 @@ package Flave {
 		public var Direction:Number = 0;
 		// The beam's Range:
 		public var Range:Number;
+		// The currently projected beam's range:
+		public var CurRange:Number;
 		// The beam's color:
 		public var Color:uint = 0xFF00000;
 		// The ray's caster It can be a particle in which the ray
@@ -45,7 +47,7 @@ package Flave {
 		public var Caster:* = null;
 		// Wheter to update the starting and ending points to match caster
 		// movements:
-		public var fixOnCaster = false;
+		public var fixOnCaster:Boolean = false;
 		
 		// Returns the last hitten object:
 		public var lastHit:* = null;
@@ -53,20 +55,24 @@ package Flave {
 		// User defined data
 		public var userDef:*;
 		
-		// Constructor:
+		// Constructor
 		public function Ray() {
 			this.mouseEnabled = false;
 			this.mouseChildren = false;
 		}
 		
-		// Updates the beam stream:
+		// Updates the beam stream
+		// @param startX The X origin of the beam
+		// @param startY The Y origin of the beam
+		// @param dir The beam's direction
+		// @param range The beams's range
 		public function updateBeam(startX:Number, startY:Number, dir:Number, range:Number) : void {
 			sx = startX;
 			sy = startY;
 			
 			Direction = dir;
 			
-			Range = range;
+			CurRange = Range = range;
 			
 			// Calculate end points:
 			ex = sx + Math.cos(Direction * (Math.PI / 180)) * Range;
@@ -87,37 +93,37 @@ package Flave {
 			this.graphics.lineTo(ex, ey);
 		}
 		
-		// Trims the ray into the given range:
-		public function trim(minX, minY, maxX, maxY) : void {
+		// TODO: Optimize this thing!
+		// Trims the ray into the given range
+		// @param minX The left X boundary
+		// @param minY The top Y boundary
+		// @param maxX The right X boundary
+		// @param maxY The bottom Y boundary
+		public function trim(minX:Number, minY:Number, maxX:Number, maxY:Number) : void {
 			// Test each line of the boundary:
-			if(CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, minY, maxX, minY)[0]){
-				var res = CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, minY, maxX, minY)[1];
-				ex = res.x;
-				ey = res.y;
+			var res:Array = CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, minY, maxX, minY);
+			if(res[0]){
+				ex = res[1].x;
+				ey = res[1].y;
 			}
 			
-			if(CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, minY, minX, maxY)[0]){
-				res = CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, minY, minX, maxY)[1];
-				ex = res.x;
-				ey = res.y;
+			res = CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, minY, minX, maxY);
+			if(res[0]){
+				ex = res[1].x;
+				ey = res[1].y;
 			}
 			
-			if(CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, maxY, maxX, maxY)[0]){
-				res = CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, maxY, maxX, maxY)[1];
-				ex = res.x;
-				ey = res.y;
+			res = CollisionResolver.checkLinesP(sx, sy, ex, ey, minX, maxY, maxX, maxY);
+			if(res[0]){
+				ex = res[1].x;
+				ey = res[1].y;
 			}
 			
-			if(CollisionResolver.checkLinesP(sx, sy, ex, ey, maxX, minY, maxX, maxY)[0]){
-				res = CollisionResolver.checkLinesP(sx, sy, ex, ey, maxX, minY, maxX, maxY)[1];
-				ex = res.x;
-				ey = res.y;
+			res = CollisionResolver.checkLinesP(sx, sy, ex, ey, maxX, minY, maxX, maxY);
+			if(res[0]){
+				ex = res[1].x;
+				ey = res[1].y;
 			}
-			
-			/*sx = Math.max(minX, Math.min(sx, maxX));
-			sy = Math.max(minY, Math.min(sy, maxY));
-			ex = Math.max(minX, Math.min(ex, maxX));
-			ey = Math.max(minY, Math.min(ey, maxY));*/
 		}
 	}
 }

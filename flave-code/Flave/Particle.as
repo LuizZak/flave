@@ -50,17 +50,17 @@ package Flave {
 		public var CollisionPair:Array = [];
 		
 		// If the particle is currently being drag
-		var drag:Boolean = false;
+		public var drag:Boolean = false;
 		
 		// Temp vars
-		var vx:Number = X;
-		var vy:Number = Y;
+		public var vx:Number = X;
+		public var vy:Number = Y;
 		
 		// Last connected constraint
-		var lastIndex:int = 0;
+		public var lastIndex:int = 0;
 		
 		// Constraints that this particle is attached to:
-		var constraints:Array = new Array();
+		public var constraints:Array = new Array();
 		
 		// Whether this particle collide with other particles
 		// and other constraints:
@@ -107,12 +107,6 @@ package Flave {
 				this.graphics.beginFill(0xAAAAAA, 0.5 + iMass/2);
 			
 			this.graphics.drawCircle(0, 0, rad);
-			
-			/*this.graphics.clear();
-			
-			this.graphics.beginFill(0xFFFFFF, 1 + iMass/2);
-			
-			this.graphics.drawCircle(0, 0, rad);*/
 		}
 		
 		// Clean the garbage (remove listeners, etc.)
@@ -147,7 +141,7 @@ package Flave {
 		}
 		
 		// Happens when the particle is clicked:
-		public function click(e) : void {
+		public function click(e:*) : void {
 			if(!parent['interactible']) return;
 			
 			if(Input.keysDown[16]){
@@ -164,14 +158,14 @@ package Flave {
 		}
 		
 		// Happens when the particle is released:
-		public function up(e) : void {
+		public function up(e:*) : void {
 			drag = false;
 			
 			stage.removeEventListener("mouseMove", move);
 		}
 		
 		// Happens when the particle is mouse-moved:
-		public function move(e) : void {
+		public function move(e:*) : void {
 			if(!drag)
 				stage.removeEventListener("mouseMove", move);
 			
